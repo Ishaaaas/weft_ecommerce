@@ -6,7 +6,7 @@ Products, orders and newsletter signups are stored in MongoDB. Garments are draw
 
 Customer Website: https://weft-ecommerce.onrender.com
 
-Admin Panel:https://weft-ecommerce-admin.onrender.com
+Admin Panel:https://weft-ecommerce-admin-panel.onrender.com
 
 ## What you need
 
