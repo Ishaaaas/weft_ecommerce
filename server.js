@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const app = require('./src/app');
 
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/weft';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 async function main() {
   await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 8000 });

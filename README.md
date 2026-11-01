@@ -2,11 +2,6 @@
 
 A clothing store with a Node.js and Express backend, MongoDB for data, and a plain JavaScript front end.
 Products, orders and newsletter signups are stored in MongoDB. Garments are drawn in the browser as SVG with fabric textures, so there are no image files.
-## Live Websites
-
-Customer Website:https://weft-ecommerce.onrender.com
-
-Admin Panel:https://weft-ecommerce-admin.onrender.com
 
 ## What you need
 
@@ -58,10 +53,3 @@ public/app.js             storefront logic: filters, cart, checkout, API calls
 - **Emails are not sent.** The order confirmation tells the customer they will be emailed, so connect a mail service (for example Resend, SendGrid or Amazon SES) before launch, or change that wording in `public/app.js`.
 - **Set `TRUST_PROXY=1`** when you deploy behind a host such as Render, Railway or Nginx, so rate limiting counts each visitor separately.
 - Keep `.env` private. It holds your database password.
-
-
-## Checkout options and customer accounts
-- Checkout offers **Razorpay** (online) and **Cash on Delivery (COD)**. COD orders are stored in MongoDB as placed orders with payment status `pending`; customers see an order confirmation and pay when the parcel arrives. Razorpay orders are verified server-side before being marked paid.
-- The top-right **Create account / Log in** control supports MongoDB-backed customer accounts. Passwords are stored as salted scrypt hashes; the session is an HTTP-only signed cookie.
-- Add `AUTH_SECRET` to your local `.env` and Render environment variables. Use a long random secret in production. Keep `RAZORPAY_KEY_SECRET` private and use Test Mode keys while testing.
-- Accounts are optional; checkout still works without logging in.
