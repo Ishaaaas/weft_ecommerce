@@ -28,11 +28,33 @@
       });
     });
   }
-  // The garment drawing code expects colours as [name, hex] pairs and facts as [label, value] pairs.
+  // Convert database products into a safe, consistent shape for the storefront.
   function normalize(p) {
-    p.colors = p.colors.map(function (c) { return [c.name, c.hex]; });
-    p.facts = (p.facts || []).map(function (f) { return [f.label, f.value]; });
-    p.o = p.options || {};
+    p = p || {};
+    p.colors = (Array.isArray(p.colors) && p.colors.length ? p.colors : [{ name: 'Default', hex: '#777777' }])
+      .map(function (c) {
+        if (Array.isArray(c)) return [c[0] || 'Default', c[1] || '#777777'];
+        return [c && c.name ? c.name : 'Default', c && (c.hex || c.h) ? (c.hex || c.h) : '#777777'];
+      });
+    p.facts = (Array.isArray(p.facts) ? p.facts : []).map(function (f) {
+      if (Array.isArray(f)) return [f[0] || '', f[1] || ''];
+      return [f && f.label ? f.label : '', f && f.value ? f.value : ''];
+    });
+    p.options = p.options || p.o || {};
+    p.o = p.options;
+    p.sizes = Array.isArray(p.sizes) && p.sizes.length ? p.sizes : ['S', 'M', 'L', 'XL'];
+    p.out = Array.isArray(p.out) ? p.out : [];
+    p.rating = Number.isFinite(Number(p.rating)) ? Number(p.rating) : 0;
+    p.n = Number.isFinite(Number(p.n)) ? Number(p.n) : 0;
+    p.price = Number.isFinite(Number(p.price)) ? Number(p.price) : 0;
+    p.was = Number.isFinite(Number(p.was)) ? Number(p.was) : 0;
+    p.name = p.name || 'Untitled product';
+    p.type = p.type || (p.cat === 'Bottoms' ? 'chino' : 'shirt');
+    p.tex = p.tex || 'linen';
+    p.spec = p.spec || '';
+    p.desc = p.desc || '';
+    p.cat = p.cat || 'Shirts';
+    p.tag = p.tag || '';
     return p;
   }
 
@@ -174,32 +196,23 @@
       '<div class="field"><label for="c-address">Address</label><input id="c-address" name="address" autocomplete="street-address" maxlength="200" required></div>' +
       '<div class="two"><div class="field"><label for="c-city">City</label><input id="c-city" name="city" autocomplete="address-level2" maxlength="60" required></div>' +
       '<div class="field"><label for="c-pin">PIN code</label><input id="c-pin" name="pin" inputmode="numeric" autocomplete="postal-code" maxlength="6" required></div></div>' +
-      '<fieldset class="payment-choice"><legend>Payment method</legend>' +
-      '<label><input type="radio" name="paymentMethod" value="razorpay" checked> <span><b>Razorpay</b><small>Pay online using UPI, cards and supported methods</small></span></label>' +
-      '<label><input type="radio" name="paymentMethod" value="cod"> <span><b>Cash on Delivery</b><small>Pay when your order arrives</small></span></label></fieldset>' +
       '<div class="err" id="cErr" role="alert"></div></form>';
     $('#cartFoot').hidden = false;
     $('#cartFoot').innerHTML = summary(t) +
       '<button class="btn" type="submit" form="checkoutForm" id="placeBtn">Place order</button>' +
       '<button class="rm back" data-back>Back to cart</button>' +
-      '<p class="note">Choose Razorpay for online payment or Cash on Delivery to pay when your order arrives.</p>';
+      '<p class="note">Secure checkout powered by Razorpay. UPI, cards and other supported methods are available.</p>';
   }
 
   function placeOrder(f) {
     var v = function (n) { return f.elements[n].value.trim(); };
     var err = $('#cErr'), btn = $('#placeBtn');
     var customer = { name: v('name'), email: v('email'), phone: v('phone'), address: v('address'), city: v('city'), pin: v('pin') };
-    var paymentMethod = (f.elements.paymentMethod && f.elements.paymentMethod.value) || 'razorpay';
     for (var k in customer) { if (!customer[k]) { err.textContent = 'Please fill in every field.'; return; } }
     var items = cartKeys().map(function (key) { var l = parse(key); return { productId: l.p.id, colorIndex: l.ci, size: l.size, qty: cart[key] }; });
     err.textContent = '';
     btn.disabled = true; btn.textContent = 'Placing order…';
-    api('/api/orders', { method: 'POST', body: JSON.stringify({ items: items, customer: customer, paymentMethod: paymentMethod }) }).then(function (o) {
-      if (o.paymentMethod === 'cod') {
-        cart = {}; save(); view = 'done'; $('#cartN').textContent = '0';
-        $('#cartBody').innerHTML = '<div class="done"><h3>Order placed</h3><p>Thank you, ' + esc(customer.name.split(' ')[0]) + '. Your COD order <b style="font-family:var(--f-mono)">' + esc(o.orderNumber) + '</b> is confirmed. Pay ' + fmt(o.total) + ' when it arrives.</p><button class="btn" data-close>Continue shopping</button></div>';
-        $('#cartFoot').innerHTML = ''; $('#cartFoot').hidden = true; return;
-      }
+    api('/api/orders', { method: 'POST', body: JSON.stringify({ items: items, customer: customer }) }).then(function (o) {
       if (!window.Razorpay) throw new Error('Payment checkout could not load. Please refresh and try again.');
       btn.disabled = false; btn.textContent = 'Pay ' + fmt(o.total);
       var options = {
@@ -307,53 +320,6 @@
       });
     }
   });
-
-  // Account creation and login use MongoDB-backed accounts with an HTTP-only session cookie.
-  var authMode = 'register';
-  function setAuthMode(mode) {
-    authMode = mode;
-    $('#authTitle').textContent = mode === 'register' ? 'Create your account' : 'Log in to Weft';
-    $('#authNameWrap').hidden = mode !== 'register';
-    $('#authName').required = mode === 'register';
-    $('#authPassword').autocomplete = mode === 'register' ? 'new-password' : 'current-password';
-    $('#authSubmit').textContent = mode === 'register' ? 'Create account' : 'Log in';
-    $('#authErr').textContent = '';
-    document.querySelectorAll('[data-auth-mode]').forEach(function (b) { b.className = 'btn' + (b.dataset.authMode === mode ? '' : ' alt'); });
-  }
-  function openAccount() {
-    $('#authOverlay').hidden = false;
-    api('/api/auth/me').then(function (r) {
-      if (r.user) {
-        $('#authTitle').textContent = 'Hello, ' + r.user.name;
-        $('#authForm').hidden = true; $('#authLogout').hidden = false;
-        $('#openAccount').textContent = r.user.name.split(' ')[0];
-      } else {
-        $('#authForm').hidden = false; $('#authLogout').hidden = true; setAuthMode('register');
-      }
-    }).catch(function () { $('#authForm').hidden = false; setAuthMode('register'); });
-  }
-  $('#openAccount').addEventListener('click', openAccount);
-  $('#closeAccount').addEventListener('click', function () { $('#authOverlay').hidden = true; });
-  $('#authOverlay').addEventListener('click', function (e) { if (e.target === $('#authOverlay')) $('#authOverlay').hidden = true; });
-  document.querySelectorAll('[data-auth-mode]').forEach(function (b) { b.addEventListener('click', function () { $('#authForm').hidden = false; $('#authLogout').hidden = true; setAuthMode(b.dataset.authMode); }); });
-  $('#authForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var form = e.currentTarget, data = { email: form.elements.email.value.trim(), password: form.elements.password.value };
-    if (authMode === 'register') data.name = form.elements.name.value.trim();
-    $('#authErr').textContent = '';
-    $('#authSubmit').disabled = true;
-    api('/api/auth/' + authMode, { method: 'POST', body: JSON.stringify(data) }).then(function (r) {
-      $('#authTitle').textContent = 'Hello, ' + r.user.name;
-      $('#authForm').hidden = true; $('#authLogout').hidden = false;
-      $('#openAccount').textContent = r.user.name.split(' ')[0];
-    }).catch(function (err) { $('#authErr').textContent = err.message; }).finally(function () { $('#authSubmit').disabled = false; });
-  });
-  $('#authLogout').addEventListener('click', function () {
-    api('/api/auth/logout', { method: 'POST', body: '{}' }).then(function () {
-      $('#authOverlay').hidden = true; $('#authForm').reset(); $('#authForm').hidden = false; $('#authLogout').hidden = true; $('#openAccount').textContent = 'Create account / Log in';
-    });
-  });
-  api('/api/auth/me').then(function (r) { if (r.user) $('#openAccount').textContent = r.user.name.split(' ')[0]; }).catch(function () {});
 
   renderChips();
   renderCloth();

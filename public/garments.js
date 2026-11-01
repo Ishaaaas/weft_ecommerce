@@ -163,10 +163,18 @@
 
   var uid=0;
   function garment(p,ci){
-    var u=++uid, c=p.colors[ci].h||p.colors[ci][1], S=SH[p.type], o=p.o||{};
+    p = p || {};
+    var colors = Array.isArray(p.colors) && p.colors.length ? p.colors : [['Default','#777777']];
+    ci = Number.isInteger(Number(ci)) ? Number(ci) : 0;
+    if (ci < 0 || ci >= colors.length) ci = 0;
+    var color = colors[ci] || colors[0];
+    var colorName = Array.isArray(color) ? (color[0] || 'Default') : (color.name || 'Default');
+    var c = (Array.isArray(color) ? color[1] : (color.hex || color.h)) || '#777777';
+    if (!/^#[0-9a-fA-F]{6}$/.test(c)) c = '#777777';
+    var u=++uid, S=SH[p.type] || SH.shirt, o=p.o||p.options||{};
     var stitch=lum(c)>150?mix(c,'#000000',.28):mix(c,'#ffffff',.32);
     var clip=[S.body].concat(S.parts.map(function(x){return x.d}));
-    var out='<svg viewBox="0 0 400 480" role="img" aria-label="'+esc(p.name)+' in '+esc(p.colors[ci][0])+'">';
+    var out='<svg viewBox="0 0 400 480" role="img" aria-label="'+esc(p.name || 'Garment')+' in '+esc(colorName)+'">';
     out+='<defs><clipPath id="cp'+u+'">'+clip.map(function(d){return '<path d="'+d+'"/>'}).join('')+'</clipPath></defs>';
     out+='<g filter="url(#dsh)"><path d="'+S.body+'" fill="'+c+'"/>';
     S.parts.forEach(function(x){out+='<path d="'+x.d+'" fill="'+tone(c,x.t)+'"/>'});

@@ -41,7 +41,6 @@ nav.main a:hover{color:var(--ink)}
 .search{flex:1;min-width:0;max-width:340px;margin-left:auto}
 .search input{width:100%;height:40px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:0 12px;font-size:14px}
 .search input::placeholder{color:var(--muted)}
-.accountbtn{height:40px;padding:0 12px;border:1px solid var(--line);background:transparent;border-radius:6px;font-size:13px;font-weight:600;white-space:nowrap}
 .cartbtn{display:flex;align-items:center;gap:8px;height:40px;padding:0 14px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:6px;font-weight:600;font-size:14px}
 .cartbtn .n{background:var(--bg);color:var(--ink);min-width:20px;height:20px;border-radius:10px;font:500 12px/20px var(--f-mono);text-align:center;padding:0 5px}
 
@@ -174,24 +173,6 @@ footer{background:var(--surface);border-top:1px solid var(--line)}
 .panel li span:first-child{color:var(--muted);flex:none}
 .panel li span:last-child{text-align:right}
 .panel .btn{width:100%;margin-top:20px}
-.payment-choice{border:1px solid var(--line);border-radius:8px;padding:12px;margin:16px 0 4px;display:grid;gap:10px}
-.payment-choice legend{font-weight:700;padding:0 5px}
-.payment-choice label{display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--line);border-radius:6px;cursor:pointer}
-.payment-choice input{margin-top:4px;accent-color:var(--ink)}
-.payment-choice span{display:grid;gap:4px}
-.payment-choice small{color:var(--muted);font-size:12px}
-.auth-overlay{position:fixed;inset:0;z-index:100;background:rgba(8,9,11,.62);display:flex;align-items:center;justify-content:center;padding:18px}
-.auth-overlay[hidden]{display:none}
-.auth-card{position:relative;width:min(440px,100%);max-height:90vh;overflow:auto;background:var(--bg);padding:28px;border-radius:12px;box-shadow:var(--shadow)}
-.auth-card h2{font-size:30px;padding-right:28px}
-.auth-intro{color:var(--muted);font-size:14px}
-.auth-x{position:absolute;right:14px;top:14px}
-.auth-tabs{display:flex;gap:8px;margin:20px 0}
-.auth-tabs .btn{flex:1;margin:0}
-.auth-form .field{margin:12px 0}
-.auth-form input{width:100%;height:42px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:0 10px}
-.auth-form .btn{width:100%;margin-top:10px}
-.auth-form .err{color:var(--sale);font-size:13px;min-height:18px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:6px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
@@ -203,8 +184,7 @@ footer{background:var(--surface);border-top:1px solid var(--line)}
   nav.main{display:none}
 }
 @media (max-width:640px){
-  .bar{gap:8px}
-  .accountbtn{font-size:11px;padding:0 7px;white-space:normal;max-width:95px;line-height:1.1}
+  .bar{gap:10px}
   .search{max-width:none}
   .cartbtn .lb{display:none}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 12px}
