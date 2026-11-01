@@ -2,6 +2,11 @@
 
 A clothing store with a Node.js and Express backend, MongoDB for data, and a plain JavaScript front end.
 Products, orders and newsletter signups are stored in MongoDB. Garments are drawn in the browser as SVG with fabric textures, so there are no image files.
+## Live Websites
+
+Customer Website: https://weft-ecommerce.onrender.com
+
+Admin Panel:https://weft-ecommerce-admin.onrender.com
 
 ## What you need
 
