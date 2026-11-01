@@ -29,7 +29,7 @@ app.get("/api/session", (req, res) => res.json({ authenticated: Boolean(req.sess
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
   if (username !== (process.env.ADMIN_USERNAME || "admin") ||
-      password !== (process.env.ADMIN_PASSWORD || "change-this-password")) {
+      password !== (process.env.ADMIN_PASSWORD || "Weft123!")) {
     return res.status(401).json({ error: "Incorrect username or password." });
   }
   req.session.isAdmin = true;
